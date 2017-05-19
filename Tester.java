@@ -5,6 +5,12 @@ import partitions.Partitions.Partition;
 public class Tester {
 	
 	public static void main(String[] args) {
+		int[] a = {};
+		Partition empty = Partitions.getPartition(a);
+		System.out.println(empty);
+		System.out.println("Sum = " + empty.sum());
+		System.out.println("Count = " + empty.count());
+		
 		int n = 9;
 		int r = 6;
 		System.out.println(n + "! = " + Combinatorics.fact(n));
@@ -78,6 +84,6 @@ public class Tester {
 			*Combinatorics.comb(5, p.count())
 		));
 		
-		//System.out.println(parts)
+		//System.out.println(parts);
 	}
 }

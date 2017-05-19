@@ -21,45 +21,46 @@ public class Partitions {
 	
 	public Partitions() {
 		partitions = new ArrayList<ArrayList<Partition>>();
+		
+		// add the Zero Partition
+		ArrayList<Partition> zeroRow = new ArrayList<Partition>();
+		zeroRow.add(new Partition(new int[0]));
+		partitions.add(zeroRow);
 	}
 	
 	
 	/* Adding rows to the data structure */
 	public void addRow() {
-		addRow(len()+1);
+		addRow(len());
 	}
 	
 	private void addRow(int n) {
 		ArrayList<Partition> row = new ArrayList<Partition>();
-		if(partitions.isEmpty()) {
-			// add BASIS to array
-			row.add(new Partition(BASIS, false, false));
-		} else {
-			// add the single Partition
-			Integer[] single = new Integer[1];
-			single[0] = n;
-			row.add(new Partition(single, false, false));
+		
+		// add the single Partition
+		Integer[] single = new Integer[1];
+		single[0] = n;
+		row.add(new Partition(single, false, false));
+		
+		// loop through last half of partitions
+		for(int i = (n+1)/2; i < n; i++) {
+			ArrayList<Partition> current = partitions.get(i);
+			int diff = n - i;
 			
-			// loop through last half of partitions
-			for(int i = (n+1)/2 - 1; i+1 < n; i++) {
-				ArrayList<Partition> current = partitions.get(i);
-				int diff = n - i - 1;
-				
-				// loop through Partitions in this row
-				Iterator<Partition> it = current.iterator();
-				Partition p;
-				while(it.hasNext() && (p = it.next()).min() >= diff) {
-					// add new if the partition has min >= diff
-					row.add(p.append(diff));
-				}
+			// loop through Partitions in this row
+			Iterator<Partition> it = current.iterator();
+			Partition p;
+			while(it.hasNext() && (p = it.next()).min() >= diff) {
+				// add new if the partition has min >= diff
+				row.add(p.append(diff));
 			}
 		}
-		partitions.add(n-1,row);
+		partitions.add(n,row);
 	}
 	
 	public void addUpTo(int n) {
 		int next;
-		while((next = len()+1) <= n) {
+		while((next = len()) <= n) {
 			addRow(next);
 		}
 	}
@@ -68,7 +69,7 @@ public class Partitions {
 	/* Trimming */
 	public void trimRow(int n, int minVal) {
 		if(n < 1) {return;}
-		ArrayList<Partition> row = partitions.get(n-1);
+		ArrayList<Partition> row = partitions.get(n);
 		
 		// iterate over the row until min gets too high
 		int i = row.size()-1;
@@ -78,14 +79,14 @@ public class Partitions {
 	}
 	
 	public void trimAllRows(int minVal) {
-		for(int n = 1; n <= len(); n++) {
+		for(int n = 1; n < len(); n++) {
 			trimRow(n, minVal);
 		}
 	}
 	
 	public void trimForNextRow() {
-		int last = len();
-		for(int n = 1; n <= last; n++) {
+		int last = len()-1;
+		for(int n = 1; n < last; n++) {
 			trimRow(n, last-n+1);
 		}
 	}
@@ -118,10 +119,11 @@ public class Partitions {
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		for(ArrayList<Partition> ap: partitions) {
+			sb.append("[ ");
 			for(Partition p: ap) {
 				sb.append(p.toString() + " ");
 			}
-			sb.append('\n');
+			sb.append("]\n");
 		}
 		return sb.toString();
 	}
@@ -134,11 +136,11 @@ public class Partitions {
 		}
 		
 		Partitions parts = new Partitions();
-		while(parts.len() < n) {
+		while(parts.len() <= n) {
 			parts.addRow();
 			parts.trimForNextRow();
 		}
-		ArrayList<Partition> ap = parts.partitions.get(n-1);
+		ArrayList<Partition> ap = parts.partitions.get(n);
 		return ap.toArray(new Partition[ap.size()]);
 	}
 	// in practice, this method can go up to 73 before java runs out of heap space
@@ -165,6 +167,11 @@ public class Partitions {
 	public static Partition getPartitionOf(char[] arr) {
 		if(arr == null) {
 			return null;
+		}
+		
+		if(arr.length == 0) {
+			// zero partition
+			return new Partitions().new Partition(new int[0]);
 		}
 		
 		int[] values = new int[arr.length];
@@ -196,6 +203,11 @@ public class Partitions {
 	public static Partition getPartitionOf(int[] arr) {
 		if(arr == null) {
 			return null;
+		}
+
+		if(arr.length == 0) {
+			// zero partition
+			return new Partitions().new Partition(new int[0]);
 		}
 		
 		int[] values = new int[arr.length];
@@ -229,6 +241,11 @@ public class Partitions {
 			return null;
 		}
 		
+		if(arr.length == 0) {
+			// zero partition
+			return new Partitions().new Partition(new int[0]);
+		}
+		
 		int[] values = new int[arr.length];
 		ArrayList<Integer> refs = new ArrayList<Integer>(arr.length);
 		
@@ -259,6 +276,11 @@ public class Partitions {
 	public static <T> Partition getPartitionOf(T[] arr) {
 		if(arr == null) {
 			return null;
+		}
+
+		if(arr.length == 0) {
+			// zero partition
+			return new Partitions().new Partition(new int[0]);
 		}
 		
 		int[] values = new int[arr.length];
@@ -329,17 +351,8 @@ public class Partitions {
 				Arrays.sort(this.arr, Collections.reverseOrder());
 			}
 		}
-
-		/*private Partition(Partition p) {
-			this((int[])null);
-			this.arr = p.arr;
-		}*/
 		
 		private boolean isValid() {
-			// invalid if empty
-			if(arr.length == 0)
-				return false;
-			
 			// invalid if non-positive values
 			for(int i: arr) {
 				if(i <= 0) {
@@ -348,6 +361,10 @@ public class Partitions {
 			}
 			
 			return true;
+		}
+		
+		private boolean isZero() {
+			return (count() == 0);
 		}
 		
 		
@@ -360,7 +377,11 @@ public class Partitions {
 			return sum;
 		}
 		
-		public int prod() {
+		public int prod() throws ZeroPartitionException {
+			if(isZero()) {
+				throw new ZeroPartitionException();
+			}
+			
 			int prod = 1;
 			for(int i: arr) {
 				prod *= i;
@@ -372,11 +393,19 @@ public class Partitions {
 			return arr.length;
 		}
 		
-		public int max() {
+		public int max() throws ZeroPartitionException {
+			if(isZero()) {
+				throw new ZeroPartitionException();
+			}
+			
 			return arr[0];
 		}
 		
-		public int min() {
+		public int min() throws ZeroPartitionException {
+			if(isZero()) {
+				throw new ZeroPartitionException();
+			}
+			
 			return arr[arr.length-1];
 		}
 		
@@ -404,7 +433,7 @@ public class Partitions {
 		
 		
 		/* member access and iteration */
-		public int intAt(int index) {
+		public int intAt(int index) throws ArrayIndexOutOfBoundsException {
 			return arr[index];
 		}
 		
@@ -515,6 +544,11 @@ public class Partitions {
 		// gives the frequency of integers appearing in the Partition
 		// in the form of another Partition
 		public Partition freq() {
+			if(isZero()) {
+				// frequency of zero partition is itself
+				return new Partition(new int[0]);
+			}
+			
 			int[] counts = new int[arr.length];
 			
 			int cur = 0;
@@ -536,7 +570,11 @@ public class Partitions {
 		
 		// the order of a partition is the number of times the freq
 		// can be taken before reaching the BASIS array
-		public int order() {
+		public int order() throws ZeroPartitionException {
+			if(isZero()) {
+				throw new ZeroPartitionException();
+			}
+			
 			int order = 0;
 			Partition basis = new Partition(BASIS, false, false);
 			Partition freq = this;
