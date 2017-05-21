@@ -84,6 +84,15 @@ public class Tester {
 			*Combinatorics.comb(5, p.count())
 		));
 		
+		int[] coins = {1,5,10,25,50};
+		System.out.println("Ways to make change for a dollar = " + Decomps.countSelectK(100, coins));
+		
+		int n4 = 100;
+		System.out.println(Decomps.countMEachSize(n4, 1));
+		System.out.println(Decomps.countNotMultiplesOf(n4, 2));
+		
+		System.out.println(Decomps.countUnequalOddGroups(120));
+		
 		//System.out.println(parts);
 	}
 }
