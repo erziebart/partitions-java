@@ -147,16 +147,7 @@ public class Partitions {
 	
 	public static long numPartitionsOf(int n) {
 		// O(n^2) algorithm derived from pentagonal number theorem
-		long[] coeffs = new long[n+1];
-		coeffs[0] = 1;
-		
-		for(int k = 1; k <= n; k++) {
-			for(int i = 0; i < coeffs.length-k; i++) {
-				coeffs[i+k] += coeffs[i];
-			}
-		}
-		
-		return coeffs[n];
+		return Decomps.count(n);
 	}
 	// goes up to 405 before long overflows
 	
